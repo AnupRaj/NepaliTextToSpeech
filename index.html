@@ -1,0 +1,640 @@
+<html><head><title>Nepali Text to Speech</title>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/jquery.jplayer.min.js"></script>
+<script type="text/javascript" src="js/jplayer.playlist.min.js"></script>
+
+<script>
+    /* ------------------------------------------------------------------------------------------------------------------------------------------- */    // array with names of files of pronounciations containing mp3 voice files
+        // global 
+    var nepali = new Array();
+    
+    function process_text(){
+        
+        var str = document.form.entity.value;                               // collect the text (encoded HTML)
+        
+        var str_length = str.length;                                         // length of string
+
+        //alert(str_length); // debug mode
+  
+        var eHu = new Array();                                              // eHu = encoded_HTML_unicode
+                     
+        var array_index = 0;
+        // we'll be checking each character to detect that if the string has proper encoded HTML
+        for(x=0; x < str_length; x++){
+                               
+            var seventh = x + 6;                                                 // counter for seventh character which is semicolon
+            
+            // if the first two characters are &# and seventh character is a semicolon then the numbers between them contains value for encoded HTML
+            if( (str.substr(x,2) == "&#") && (str.substr(seventh,1) == ";") ){
+                var x_plus2 = x + 2;
+                var encoded_HTML = str.substr(x_plus2,4);                       // this variable encoded_HTML holds the HTML encoded (numeric only) value of Unicode
+                // assign the values into array
+                eHu [array_index] = encoded_HTML;
+                array_index++;                
+            }
+            
+            if(str.substr(x,1) == " ") {
+                // we are supposing that the converted string is in pure HTML encoded string
+                // this is either space or newline hence assign a space.mp3
+                 eHu[array_index] = "_";                                              // underscore here represents space 
+                 array_index++
+
+           }
+           
+        }  /* --------- /for loop ------------- */
+
+    
+        assign_voice(eHu);                          // assign_voice
+        // this function should be returing assign_voice(eHu);
+        //return assign_voice(eHu);
+    
+    }  /* ----- /process_text -------- */
+    
+     
+    /* ------------------------------------------------------------------------------------------------------------------------------------------- 
+        convert unicode into HTML encoded values
+    */
+    function doh(d) {
+        return d;
+    }
+
+    function hoj(d,tags) {
+        /* HTML entity */
+        if (d == '<')
+            return '&lt;';
+        if (d == '>')
+            return '&gt;';
+        if (d == '&')
+            return '&amp;';
+
+
+        if (d.charCodeAt(0) > 127)
+            return '&#' + doh(d.charCodeAt(0)) + ';';
+
+        return d;
+
+    }
+
+    function htmlEntity(tags) {
+        var aa = document.form.symb.value;
+        var bb = '';
+        for (i = 0; i < aa.length; i++) 
+
+            bb += hoj(aa.charAt(i),tags);
+
+        document.form.entity.value = bb;
+        
+        process_text(); // further process text to separate numeric values of encoded HTML
+    }
+    /* 
+        / convert unicode into HTML encoded values
+    ------------------------------------------------------------------------------------------------------------------------------------------- */
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    // now the Array eHu contains all the encoded html of unicode
+    // we are ready to process 
+/* ---------------------------------------------------------------------------------------------------------------------------------------------------------- 
+        HTML encoded values processing for pronounciation
+   ---------------------------------------------------------------------------------------------------------------------------------------------------------- */
+   function assign_voice(eHu){
+        clean_tray();
+        
+        var eHu_length = eHu.length;                    // count elements in array eHu (encoded_HTML_unicode)
+
+        
+        for(x = 0; x < eHu_length ; x++){
+            
+            var encoded_HTML_unicode = eHu[x];
+            
+            if(is_swar(encoded_HTML_unicode)){
+                // original
+                
+                if(is_tray_empty()){
+                    
+                    store_html_encode_of_nepali(encoded_HTML_unicode);                    
+                }else{
+                    // tray is not empty hence 
+                    
+                    var tray = get_tray();
+                    store_html_encode_of_nepali(tray);
+                    //alert(tray);
+                    store_html_encode_of_nepali(encoded_HTML_unicode);                
+                    
+                    clean_tray();
+                }
+                
+                // original
+                /*
+                if(is_tray_empty()){
+                    
+                    store_html_encode_of_nepali(encoded_HTML_unicode);                    
+                }else{
+                    // tray is not empty hence 
+                    
+                    var tray = get_tray();
+                    store_html_encode_of_nepali(tray);
+                    store_html_encode_of_nepali(encoded_HTML_unicode);                
+                    
+                    clean_tray();
+                }
+                */
+                /*
+                // copied
+                
+                // is temproary tray empty
+                if(is_tray_empty()){
+
+                    
+                    // yes Tray is empty hence keep is in tray
+                    var keep_in_tray_value = encoded_HTML_unicode;
+                    keep_in_tray(keep_in_tray_value);
+                    
+                }else{
+                    // Tray is not empty hence  
+                        // 1 get values of tray in a variable
+                        // 2 empty the tray
+                        // 3 place the new value in tray (not tray's value but array)
+                        // 4 process the value retrieved from tray to find proper pronounciation
+                        
+                    var tray = get_tray();
+                    store_html_encode_of_nepali(tray);
+                    
+                    clean_tray();
+                    
+                    var keep_in_tray_value = encoded_HTML_unicode;
+                    
+                    keep_in_tray(keep_in_tray_value);
+                }
+                */
+                
+            }else if(is_wyanjan(encoded_HTML_unicode)){
+            
+                // is temproary tray empty
+                if(is_tray_empty()){
+
+                    
+                    // yes Tray is empty hence keep is in tray
+                    var keep_in_tray_value = encoded_HTML_unicode;
+                    keep_in_tray(keep_in_tray_value);
+                    
+                }else{
+                    // Tray is not empty hence  
+                        // 1 get values of tray in a variable
+                        // 2 empty the tray
+                        // 3 place the new value in tray (not tray's value but array)
+                        // 4 process the value retrieved from tray to find proper pronounciation
+                        
+                    var tray = get_tray();
+                    store_html_encode_of_nepali(tray);
+                    
+                    clean_tray();
+                    
+                    var keep_in_tray_value = encoded_HTML_unicode;
+                    
+                    keep_in_tray(keep_in_tray_value);
+                    
+                    
+                    
+                }
+                
+            }else if(is_helper(encoded_HTML_unicode)){
+
+                
+                // yes it is helper stuff
+                    // aakar, eekar, ookar, aikar, okar, aukar, sirbindhu, ha
+                if(is_tray_empty()){
+                    // yes tray is empty
+                    // helpers are not supposed to appear before wyanjan_warna hence trash it or add space
+                    
+                    // trashing
+                    // do nothing
+                    
+                    // add space
+                    // I'll do it later hai
+                    alert(" helper ko palo ma kasari empty : bad html encoding");
+                    
+                }else{
+                    // no tray is not empty hence keep it in tray
+                    var tray = get_tray();
+                    tray = tray + "," + encoded_HTML_unicode;
+                    
+                    keep_in_tray(tray);
+                    
+                }
+                
+            }else{
+                // add space for non recognized stuffs
+                
+            }
+        } // ---- /for loop ----
+        
+        
+        // after the for loop ends 
+            // tray still holds last encoded HTML hence get_tray assign it in array.
+        var tray = get_tray();
+        store_html_encode_of_nepali(tray);
+        
+        nepali_bola();
+        
+        
+        
+        
+        
+        
+        
+                
+    }
+    
+/*
+---------------------------this function is for debug mode only (for development environment)
+remove this function on production environment
+*/
+    function dump(arr,level) {
+	var dumped_text = "";
+	if(!level) level = 0;
+	
+	//The padding given at the beginning of the line.
+	var level_padding = "";
+	for(var j=0;j<level+1;j++) level_padding += "    ";
+	
+	if(typeof(arr) == 'object') { //Array/Hashes/Objects 
+		for(var item in arr) {
+			var value = arr[item];
+			
+			if(typeof(value) == 'object') { //If it is an array,
+				dumped_text += level_padding + "'" + item + "' ...\n";
+				dumped_text += dump(value,level+1);
+			} else {
+				dumped_text += level_padding + "'" + item + "' => \"" + value + "\"\n";
+			}
+		}
+	} else { //Stings/Chars/Numbers etc.
+		dumped_text = "===>"+arr+"<===("+typeof(arr)+")";
+	}
+	return dumped_text;
+}
+/*
+---------------/ this function is for debug mode only
+*/
+    function nepali_bola(){
+    
+        // array nepali has all values
+        // assign file name on those values of each element
+        // create playlist as document's inner javascript { $("#inner").html("<script> ... </scrip"+"t>")}
+        
+        var nepaliplaylist = new Array(); // contains file_mp3 and title
+        
+        var count_nepali = nepali.length;
+    
+        // from the array variable "nepali" ,
+            // generate title and mp3 file for playlist
+                    
+        var title_mp3file = new Array(); // array containing title and mp3 file
+        
+        for(x=0; x<count_nepali; x++){
+            
+            var count_nepali_element = nepali[x].length; // count element only
+            
+            // the array "nepali" has either 
+                    // one value  in one element > which returns length of 4 characters (there are 4 characters in encoded HTML of unicode)
+                    // or 
+                    // x   values in x   elements
+                    
+            if(count_nepali_element == 4){
+                // this is single element 
+                    // hence add it accordingly
+                    var utf_8 = "&#" + nepali[x] + ";";
+                    var file_mp3 = "sound/" + nepali[x] + ".mp3";
+                    var title = utf_8;
+            }else{
+                file_mp3 = nepali[x].join("_"); 
+                file_mp3 = "sound/" + file_mp3 + ".mp3";
+                
+                title = "&#" + nepali[x].join(";&#") + ";";
+            }
+            
+            // the array title_mp3file contains title and mp3 file location for playlist
+            title_mp3file[x] = new Array(title,file_mp3);
+            
+            
+        } // --------/ for loop -------------
+        
+        
+        // generate playlist
+        
+        var no_of_list = title_mp3file.length;
+        
+        var play_list = "";
+        
+
+        for(y=0; y<no_of_list; y++){
+        
+            if(y==0){
+                // first on play list
+                play_list = play_list + '{ title:"' + title_mp3file[y][0] + '", mp3:"' + title_mp3file[y][1] + '"}';
+            }else{
+                // not first on list
+            
+                play_list = play_list + ',{ title:"' + title_mp3file[y][0] + '", mp3:"' + title_mp3file[y][1] + '"}';
+            
+            }
+        } // ---/ for loop ---
+        
+        $("#inner").html("<script>myPlaylist.setPlaylist([" + play_list + "]);</scrip"+"t>")
+        
+        // clean/reset array named nepali so that whenever HTML encoding is done, new set of pronounciation replaces values in old array
+            // the following line prevents to store the same data over again
+            
+        nepali = new Array(); // destroy this array
+    }
+    
+    /* actually sets the values of tray in array 
+        it is assumed that the values in tray has proper formation, which is good to pronounce
+     */
+    function store_html_encode_of_nepali(tray){
+        /*
+            
+        */
+        var nepali_count = nepali.length;
+        if(!nepali[nepali_count]){
+        
+            // check if the tray has comma
+            if((tray.split(",").length - 1) == 0){
+                // no comma hence assign it
+                nepali[nepali_count] = tray;
+                
+            }else if((tray.split(",").length - 1) >= 1){
+                // tray has comma hence split it onto array
+                nepali[nepali_count] = tray.split(',');
+            }
+        }
+    }
+    /* is_swar do the value represents swar varna */
+    function is_swar(value){
+
+        /* data of swar varnas */
+        var swar = new Array();
+        swar[0] = 2309;     // a
+        swar[1] = 2310;     // aa
+        swar[2] = 2311;     // i
+        swar[3] = 2312;     // ii
+        swar[4] = 2313;     // u
+        swar[5] = 2314;     // oo
+        swar[6] = 2319;     // e
+        swar[7] = 2320;     // ai
+        swar[8] = 2323;     // o
+        swar[9] = 2324;     // au
+
+        /*
+        Dangerous 
+        
+        swar[] = 2309,2306     // a*
+        swar[] = 2309,2307     // a:
+        */
+        
+        
+        // compare the value with our swar varnas 
+        
+        if(in_array(value,swar,true)){
+            alert('swar warna');
+            exit;
+            return true;            // the value represents swar_varna
+        }else{
+            
+            return false;           // not swar_varna
+        }
+                
+    }
+    
+    
+    /* is_wyanjan do the value represents wyanjan warna */
+    function is_wyanjan(value){
+        
+        /* data of wyanjan varna */
+        var wyanjan = new Array();
+        
+        wyanjan[0] = 2325;      // kapuri       > ka
+        wyanjan[1] = 2326;      // kharaayo     > kha
+        wyanjan[2] = 2327;      // gaigode      > ga
+        wyanjan[3] = 2328;      // ghar jasto   > gha 
+        wyanjan[4] = 2329;      // naka thopli  > nga
+
+        wyanjan[5] = 2330;      // chari chhuchhe   > cha
+        wyanjan[6] = 2331;      // chhataa          > chha
+        wyanjan[7] = 2332;      // jaraayo          > ja
+        wyanjan[8] = 2333;      // jharana          > jha
+        wyanjan[9] = 2334;      // goru singe       > ya
+
+        wyanjan[10] = 2335;      // topi            > ta
+        wyanjan[11] = 2336;      // 
+        wyanjan[12] = 2337;      // 
+        wyanjan[13] = 2338;      // 
+        wyanjan[14] = 2339;      // tin dharke      > ana
+
+        wyanjan[15] = 2340;      // tara            > ta
+        wyanjan[16] = 2341;      // 
+        wyanjan[17] = 2342;      // 
+        wyanjan[18] = 2343;      // 
+        wyanjan[19] = 2344;      // naam            > na
+
+        wyanjan[20] = 2346;      // paati           > pa
+        wyanjan[21] = 2347;      // 
+        wyanjan[22] = 2348;      // 
+        wyanjan[23] = 2349;      // 
+        wyanjan[24] = 2350;      // mero            > ma
+
+        wyanjan[25] = 2351;      // yaatra          > ya
+        wyanjan[26] = 2352;      // raato           > ra
+        wyanjan[27] = 2354;      // lamkhutte       > la
+        wyanjan[28] = 2357;      // wakil           > wa
+
+        wyanjan[29] = 2358;      // moto            > sa
+        wyanjan[30] = 2359;      // pet chiryo      > sa
+        wyanjan[31] = 2360;      // patalo          > sa
+        wyanjan[32] = 2361;      // halo            > ha
+        
+        /*
+            Dangerous (kshya, tra, gya)
+            
+
+        wyanjan[33] =2325,2381,2359;    // kshyetri > kshya
+        wyanjan[34] =2340,2381,2352;    // tra      > tra
+        wyanjan[35] = 2332,2381,2334;   // gyani    > gya
+            
+        */
+        
+        
+        
+        
+        // compare the value with our wyanjan varnas 
+        
+        if(in_array(value,wyanjan)){
+            return true;            // the value represents wyanjan_varna
+        }else{
+            return false;           // not wyanjan_varna
+        }
+    }
+    
+    /* is_helper do the value represents aakar, eekar, ..., ookaar, ..., ekaar, okaar, aukaar, ... */
+    function is_helper(value){
+        
+        /* data of helpers  */
+        var helper = new Array();
+        helper[0] = 2366;    // aakar
+        helper[1] = 2367;    // eekaar (rashwa)
+        helper[2] = 2368;    // eekaar (dirga)
+        helper[3] = 2369;    // ookaar (rashwa)
+        helper[4] = 2370;    // ookaar (dirga)
+        helper[5] = 2375;    // ekaar 
+        helper[6] = 2376;    // aikaar
+        helper[7] = 2379;    // ookaar
+        helper[8] = 2380;    // aukaar
+        
+        /* ang, aha*/
+        helper[9] = 2306;     // sirbindhu
+        helper[10] = 2307;    // dui wota thopla (tala mathi)
+        
+        // compare the value with our helpers
+        
+        if(in_array(value,helper)){
+            return true;            // the value represents helpers
+        }else{
+            return false;           // not helpers
+        }
+        
+    }
+    
+    /* is tray empty */
+    function is_tray_empty(){
+        var tray = document.form.tray.value;
+        if(tray.length<=0){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    /* get the values of tray*/
+    function get_tray(){
+        return document.form.tray.value;
+    }
+    /* keep the values in tray */
+    function keep_in_tray(values){
+        //alert(values);
+        document.form.tray.value = values;
+
+
+    }
+    /* empty tray */
+    function clean_tray(){
+        document.form.tray.value ="";
+    }
+    
+
+    
+/*   ---------------------------------------------------------------------------------------------------------------------------------------------------------- 
+        / HTML encoded values processing for pronunciation
+     ---------------------------------------------------------------------------------------------------------------------------------------------------------- */
+
+
+
+
+
+
+
+function in_array (needle, haystack, argStrict) {
+    var key = '',        strict = !! argStrict;
+ 
+    if (strict) {
+        for (key in haystack) {
+            if (haystack[key] === needle) {                return true;
+            }
+        }
+    } else {
+        for (key in haystack) {
+            if (haystack[key] == needle) {
+                return true;
+            }
+        }
+    } 
+    return false;
+}
+</script>
+<style>
+.jp-playlist{display:none;}
+</style>
+</head>
+<body>
+<table>
+<tr><td valign="top">
+<form method="post" name="form" action=""> 
+
+    <textarea name="symb" id="symb" rows="3" cols="70" style="height:500px;width:500px;"></textarea> 
+    <!-- input name="convert" value="Convert" onclick="htmlEntity(1)" style="width:85px;padding-left:8px;" type="button" class="button" --> 
+    <br> 
+    <textarea name="entity" rows="3" cols="70" id="output" style="display:none;"></textarea> 
+    <br />
+    <input type="text" name="tray" id="tray" style ="display:none;" />
+    <br />
+    <textarea name="temp" rows="3" cols="70" style="display:none;" ></textarea>
+</form> 
+</td>
+<td valign="top">
+
+<img id="playlist-play"  src="play.png" />
+
+<div id="jpid"></div>
+		<div id="jp_container_N" class="jp-video jp-video-270p">
+			<div class="jp-type-playlist">
+				<div id="jquery_jplayer_N" class="jp-jplayer"></div>
+
+				<div class="jp-playlist">
+					<ul>
+						<!-- The method Playlist.displayPlaylist() uses this unordered list -->
+						<li></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		
+</td>
+</tr>
+</table>
+
+
+<script>
+	var myPlaylist = new jPlayerPlaylist({
+		jPlayer: "#jquery_jplayer_N",
+		cssSelectorAncestor: "#jp_container_N"
+	}, [
+		{
+			title:"Blank",
+			mp3:"sound/blank.mp3"
+		}
+	], {
+		playlistOptions: {
+			enableRemoveControls: true
+		},
+		swfPath: "js",
+		supplied: "mp3"
+	});
+
+	// The play commands
+
+	$("#playlist-play").click(function() {
+	    myPlaylist.remove();		
+		htmlEntity(1);
+	    myPlaylist.play();
+	    
+	});
+			
+</script>
+<div id="inner"></div>
+</body>
+</html>
