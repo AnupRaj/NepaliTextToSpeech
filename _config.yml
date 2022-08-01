@@ -1,0 +1,8 @@
+title: Nepali Text To Speech
+description: Nepali text to speech is web based tool that reads Devanagari Unicode and plays appropriate sound
+google_analytics: 
+show_downloads: true
+theme: jekyll-theme-minimal
+
+gems:
+  - jekyll-mentions
